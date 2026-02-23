@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>RSA Encrypt/Decrypt</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 10px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+        }
+        button {
+            cursor: pointer;
+            background: #007BFF;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>🔐 RSA Mã Hóa / Giải Mã</h2>
+
+<h3>Nhập khóa</h3>
+<input type="number" id="p" placeholder="p (số nguyên tố)">
+<input type="number" id="q" placeholder="q (số nguyên tố)">
+<input type="number" id="e" placeholder="e (gcd(e, φ(n)) = 1)">
+<button onclick="generateKeys()">Tạo khóa</button>
+
+<div class="result" id="keyResult"></div>
+
+<h3>Mã hóa</h3>
+<input type="number" id="message" placeholder="Thông điệp M">
+<button onclick="encrypt()">Mã hóa</button>
+
+<h3>Giải mã</h3>
+<input type="number" id="cipher" placeholder="Cipher C">
+<button onclick="decrypt()">Giải mã</button>
+
+<div class="result" id="result"></div>
+
+<script>
+let n, phi, d, e;
+
+function gcd(a, b) {
+    while (b != 0) {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+
+function modInverse(e, phi) {
+    for (let i = 1; i < phi; i++) {
+        if ((e * i) % phi === 1) {
+            return i;
+        }
+    }
+    return null;
+}
+
+function modPow(base, exp, mod) {
+    let result = 1;
+    base = base % mod;
+    while (exp > 0) {
+        if (exp % 2 === 1)
+            result = (result * base) % mod;
+        exp = Math.floor(exp / 2);
+        base = (base * base) % mod;
+    }
+    return result;
+}
+
+function generateKeys() {
+    let p = parseInt(document.getElementById("p").value);
+    let q = parseInt(document.getElementById("q").value);
+    e = parseInt(document.getElementById("e").value);
+
+    n = p * q;
+    phi = (p - 1) * (q - 1);
+
+    if (gcd(e, phi) !== 1) {
+        document.getElementById("keyResult").innerHTML = "❌ e không hợp lệ!";
+        return;
+    }
+
+    d = modInverse(e, phi);
+    document.getElementById("keyResult").innerHTML =
+        `n = ${n}<br>φ(n) = ${phi}<br>d = ${d}`;
+}
+
+function encrypt() {
+    let M = parseInt(document.getElementById("message").value);
+    let C = modPow(M, e, n);
+    document.getElementById("result").innerHTML = "Cipher C = " + C;
+}
+
+function decrypt() {
+    let C = parseInt(document.getElementById("cipher").value);
+    let M = modPow(C, d, n);
+    document.getElementById("result").innerHTML = "Thông điệp M = " + M;
+}
+</script>
+
+</body>
+  </html>
+  
